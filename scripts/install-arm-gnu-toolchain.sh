@@ -9,7 +9,7 @@ do
         v) VER=${OPTARG};;
     esac
 done
-VER=${VER:-'13.2.rel1'} # sets VER to this string, if it is not already set, null or empty.
+VER=${VER:-'13.2.Rel1'} # sets VER to this string, if it is not already set, null or empty.
 # Yes, bash is very weird
 
 TOOLCHAIN_NAME=arm-gnu-toolchain-${VER}-x86_64-arm-none-eabi
