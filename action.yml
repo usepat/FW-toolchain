@@ -25,3 +25,7 @@ runs:
         ${{ github.action_path }}/scripts/install-pico-sdk.sh
         echo "PICO_SDK_PATH=$PICO_SDK_PATH" >> $GITHUB_ENV
       shell: bash
+
+    - name: Enviroment Variables
+      run: env
+      shell: bash
