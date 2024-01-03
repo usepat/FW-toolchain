@@ -22,7 +22,7 @@ echo "version: $VER"
 wget "$URL"
 
 echo "Extracting..."
-tar xjf ${TOOLCHAIN_NAME}.tar.bz2
+tar -xvf ${TOOLCHAIN_NAME}.tar.bz2
 rm  ${TOOLCHAIN_NAME}.tar.bz2
 
 echo "Set ARM_GNU_TOOLCHAIN_PATH to /opt/$TOOLCHAIN_NAME/bin"
