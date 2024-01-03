@@ -1,6 +1,3 @@
-# https://gitlab.com/alelec/arm-none-eabi-gcc-deb/-/blob/main/create_deb.sh?ref_type=heads
-# props to this guy, he made a script to create a debian package.
-
 # https://askubuntu.com/questions/1243252/how-to-install-arm-none-eabi-gdb-on-ubuntu-20-04-lts-focal-fossa
 # Also props to this guy, that made an awsome stackoverflow post
 
@@ -22,10 +19,10 @@ cd /opt
 
 echo "Downloading arm-gnu toolchain x86_64" 
 echo "version: $VER"
-wget "$URL" -jxf ${TOOLCHAIN_NAME}.tar.bz2
+wget "$URL"
 
 echo "Extracting..."
-tar -jxf  ${TOOLCHAIN_NAME}.tar.bz2
+tar xjf ${TOOLCHAIN_NAME}.tar.bz2
 rm  ${TOOLCHAIN_NAME}.tar.bz2
 
 echo "Set ARM_GNU_TOOLCHAIN_PATH to /opt/$TOOLCHAIN_NAME/bin"
