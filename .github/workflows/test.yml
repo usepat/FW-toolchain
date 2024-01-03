@@ -25,4 +25,4 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - run: ${{ github.workspace }}/action.yml
+      - uses: actions/toolchain@main
