@@ -11,4 +11,4 @@ cd ../../
 
 echo "Set PICO_SDK_PATH to /opt/pico/pico-sdk"
 source $(dirname $0)/def_env_var.sh
-def_env_var PICO_SDK_PATH /opt/pico/pico-sdk
+setEnvVar "PICO_SDK_PATH" "/opt/pico/pico-sdk"

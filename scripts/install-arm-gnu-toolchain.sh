@@ -29,5 +29,5 @@ rm  ${TOOLCHAIN_NAME}.tar.xz
 
 echo "Set ARM_GNU_TOOLCHAIN_PATH to /opt/$TOOLCHAIN_NAME/bin"
 source $(dirname $0)/def_env_var.sh
-def_env_var ARM_GNU_TOOLCHAIN_PATH /opt/${TOOLCHAIN_NAME}/bin
+setEnvVar "ARM_GNU_TOOLCHAIN_PATH" "/opt/$TOOLCHAIN_NAME/bin"
 
