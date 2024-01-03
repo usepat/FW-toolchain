@@ -21,7 +21,3 @@ runs:
     - name: Install Pico SDK
       run: ${{ github.action_path }}/scripts/install-pico-sdk.sh
       shell: bash
-
-    - name: Enviroment Variables
-      run: env
-      shell: bash
