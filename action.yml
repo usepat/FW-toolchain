@@ -10,9 +10,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
     - name: Install Arm Gnu Toolchain
       run: scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
       shell: bash
