@@ -1,7 +1,7 @@
 
 def_env_var() {
-    varName = $1
-    varValue = $2
+    varName=$1
+    varValue=$2
     echo "Set $varName to $varValue"
     if $GITHUB_ACTIONS
     then
