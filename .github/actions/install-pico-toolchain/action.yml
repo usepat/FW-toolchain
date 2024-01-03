@@ -1,0 +1,22 @@
+name: "Setup Pico Toolchain"
+description: "downloads the arm gnu toolchain and the pico sdk and then sets PICO_SDK_PATH and ARM_GNU_TOOLCHAIN_PATH accordingly"
+
+inputs:
+  arm-gnu-toolchain-version:
+    description: 'Version of the arm gnu toolchain'
+    required: true
+    default: '13.2.rel1'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Arm Gnu Toolchain
+      run: ${{ github.workspace }}/scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
+      shell: bash
+
+    - name: Install Pico SDK
+      run: ${{ github.workspace }}/scripts/setup-pico-sdk.sh
+      shell: bash
