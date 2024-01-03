@@ -1,5 +1,9 @@
 name: "Setup Pico Toolchain"
 description: "downloads the arm gnu toolchain and the pico sdk and then sets PICO_SDK_PATH and ARM_GNU_TOOLCHAIN_PATH accordingly"
+author: David Wild
+branding: 
+  icon: "activity"
+  color: "red"
 
 inputs:
   arm-gnu-toolchain-version:
