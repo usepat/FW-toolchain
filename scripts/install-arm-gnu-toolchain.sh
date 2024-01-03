@@ -13,7 +13,7 @@ VER=${VER:-'13.2.rel1'} # sets VER to this string, if it is not already set, nul
 # Yes, bash is very weird
 
 TOOLCHAIN_NAME=arm-gnu-toolchain-${VER}-x86_64-arm-none-eabi
-URL=https://developer.arm.com/-/media/Files/downloads/gnu/${VER}/binrel/${TOOLCHAIN_NAME}.tar.bz2
+URL=https://developer.arm.com/-/media/Files/downloads/gnu/${VER}/binrel/${TOOLCHAIN_NAME}.tar.xz
 
 cd /opt
 
@@ -22,8 +22,8 @@ echo "version: $VER"
 wget "$URL"
 
 echo "Extracting..."
-tar -xvf ${TOOLCHAIN_NAME}.tar.bz2
-rm  ${TOOLCHAIN_NAME}.tar.bz2
+tar xf ${TOOLCHAIN_NAME}.tar.xz
+rm  ${TOOLCHAIN_NAME}.tar.xz
 
 echo "Set ARM_GNU_TOOLCHAIN_PATH to /opt/$TOOLCHAIN_NAME/bin"
 export ARM_GNU_TOOLCHAIN_PATH=/opt/${TOOLCHAIN_NAME}/bin
