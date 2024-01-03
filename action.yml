@@ -15,9 +15,13 @@ runs:
   using: "composite"
   steps:
     - name: Install Arm Gnu Toolchain
-      run: ${{ github.action_path }}/scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
+      run: >
+        ${{ github.action_path }}/scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
+        echo "ARM_GNU_TOOLCHAIN_PATH=$ARM_GNU_TOOLCHAIN_PATH" >> $GITHUB_ENV
       shell: bash
 
     - name: Install Pico SDK
-      run: ${{ github.action_path }}/scripts/install-pico-sdk.sh
+      run: >
+        ${{ github.action_path }}/scripts/install-pico-sdk.sh
+        echo "PICO_SDK_PATH=$PICO_SDK_PATH" >> $GITHUB_ENV
       shell: bash
