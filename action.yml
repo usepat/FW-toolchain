@@ -14,9 +14,9 @@ runs:
       uses: actions/checkout@v3
 
     - name: Install Arm Gnu Toolchain
-      run: ${{ github.workspace }}/scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
+      run: scripts/install-arm-gnu-toolchain.sh -v ${{ inputs.arm-gnu-toolchain-version }}
       shell: bash
 
     - name: Install Pico SDK
-      run: ${{ github.workspace }}/scripts/install-pico-sdk.sh
+      run: scripts/install-pico-sdk.sh
       shell: bash
