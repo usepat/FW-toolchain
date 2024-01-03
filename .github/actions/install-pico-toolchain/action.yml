@@ -18,5 +18,5 @@ runs:
       shell: bash
 
     - name: Install Pico SDK
-      run: ${{ github.workspace }}/scripts/setup-pico-sdk.sh
+      run: ${{ github.workspace }}/scripts/install-pico-sdk.sh
       shell: bash
