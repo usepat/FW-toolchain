@@ -14,6 +14,7 @@ VER=${VER:-'13.2.rel1'} # sets VER to this string, if it is not already set, nul
 
 TOOLCHAIN_NAME=arm-gnu-toolchain-${VER}-x86_64-arm-none-eabi
 URL=https://developer.arm.com/-/media/Files/downloads/gnu/${VER}/binrel/${TOOLCHAIN_NAME}.tar.xz
+# https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz?rev=e434b9ea4afc4ed7998329566b764309&hash=688C370BF08399033CA9DE3C1CC8CF8E31D8C441
 
 cd /opt
 
