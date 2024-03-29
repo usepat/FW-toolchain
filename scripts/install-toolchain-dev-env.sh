@@ -2,6 +2,21 @@
 
 # Setup script to configure development environment
 
+# Initialize a variable to control verbosity
+VERBOSE=0
+
+# Check for the -v argument to enable verbose output
+while getopts ":v" opt; do
+  case ${opt} in
+    v )
+      VERBOSE=1
+      ;;
+    \? )
+      echo "Usage: cmd [-v]" >&2
+      ;;
+  esac
+done
+
 # Log file for storing error messages
 LOG_FILE="setup-errors.log"
 
@@ -10,8 +25,11 @@ exec 2>>$LOG_FILE
 
 # Redirect all stderr to log file, suppress stdout
 exec 3>&1  # Preserve the original stdout in file descriptor 3
-exec 1>/dev/null  # Redirect stdout to /dev/null (suppress it)
 exec 2>>$LOG_FILE  # Redirect stderr to append to LOG_FILE
+
+if [ "$VERBOSE" -eq 0 ]; then
+  exec 1>/dev/null  # Suppress stdout if not in verbose mode
+fi
 
 # Function to check command execution
 check_command() {
