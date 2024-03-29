@@ -2,9 +2,12 @@
 
 # Setup script to configure development environment
 
-# Initialize a variable to control verbosity
-VERBOSE=0
-APT_OPTIONS=""     # Initialize as empty
+LOG_FILE="setup-errors.log"
+exec 2>>$LOG_FILE  # Redirect stderr to log file
+exec 3>&1          # Preserve stdout in file descriptor 3
+VERBOSE=0          # Control verbosity
+FORCE_REINSTALL=0  # Control forced reinstallation
+
 # Function to display usage and exit
 usage() {
   echo "Usage: $0 [-v] [-f]" >&2
@@ -20,6 +23,7 @@ while getopts ":vf" opt; do
       VERBOSE=1
       ;;
     f )
+      FORCE_REINSTALL=1,
       APT_OPTIONS="--reinstall"  # Set to reinstall packages with apt-get
       ;;
     \? )
@@ -28,16 +32,6 @@ while getopts ":vf" opt; do
   esac
 done
 shift $((OPTIND -1))
-
-# Log file for storing error messages
-LOG_FILE="setup-errors.log"
-
-# Redirect all stderr to log file
-exec 2>>$LOG_FILE
-
-# Redirect all stderr to log file, suppress stdout
-exec 3>&1  # Preserve the original stdout in file descriptor 3
-exec 2>>$LOG_FILE  # Redirect stderr to append to LOG_FILE
 
 if [ "$VERBOSE" -eq 0 ]; then
   exec 1>/dev/null  # Suppress stdout if not in verbose mode
@@ -57,7 +51,8 @@ log() {
     echo "$@" >&3  # Only output to terminal if verbose mode is enabled
   fi
 }
-
+ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi"
+PICO_SDK_PATH="/opt/pico/pico-sdk"
 # Begin script execution
 log "Verbose mode enabled."
 
@@ -69,57 +64,143 @@ echo "Installing ARM toolchain 10.3.1 ..." >&3
 sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
 check_command "sudo apt-get install gcc-arm-none-eabi $APT_OPTIONS"
 
-echo "Downloading ARM GNU toolchain 13.2.1 ..." >&3
-sudo wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-check_command "sudo wget -P /opt ARM GNU toolchain"
+# Check if ARM toolchain already exists or force reinstall is enabled
+if [ -d "$ARM_TOOLCHAIN_PATH/bin" ] && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "ARM toolchain already installed. Skipping installation." >&3
+else
+    echo "Downloading and installing ARM toolchain 13.2.1 ..." >&3
+    wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
+    sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    check_command "ARM toolchain 13.2.1 installation"
+    
+    echo "Extracting ARM GNU toolchain..." >&3
+    sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
+    check_command "sudo tar -xf /opt/arm-gnu-toolchain"
+    
+    echo "Cleaning up ARM GNU toolchain tarball..." >&3
+    sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    check_command "sudo rm /opt/arm-gnu-toolchain tarball"
+    
+    echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
+    echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    check_command "Updating PATH in .bashrc"
+fi
 
-echo "Extracting ARM GNU toolchain..." >&3
-sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
-check_command "sudo tar -xf /opt/arm-gnu-toolchain"
+sudo apt-get install git -y $APT_OPTIONS
+check_command "Installing git $APT_OPTIONS"
+if [ -d "$PICO_SDK_PATH" ] && [ -d "$PICO_SDK_PATH/lib/tinyusb" ] && git -C "$PICO_SDK_PATH" submodule status | grep -q 'tinyusb' && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "Pico SDK and required submodules already installed. Skipping installation." >&3
+else
+  echo "Installing the Pico SDK..." >&3
+  if [ ! -d "$PICO_SDK_PATH" ]; then
+      sudo mkdir -p /opt/pico
+      sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
+      check_command "sudo git clone pico-sdk"
+  fi
+  cd /opt/pico/pico-sdk || exit
+  git config --global --add safe.directory /opt/pico/pico-sdk
+  git submodule update --init
+  check_command "git submodule update --init"
+  echo "Adding the SDK and toolchain to PATH..." >&3
+  echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
+  source ~/.bashrc
+  check_command "Updating PATH in .bashrc"
+fi
 
-echo "Cleaning up ARM GNU toolchain tarball..." >&3
-sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-check_command "sudo rm /opt/arm-gnu-toolchain tarball"
 
-echo "Installing the Pico SDK..." >&3
-sudo apt-get install git -y
-sudo mkdir -p /opt/pico
-sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master /opt/pico/pico-sdk
-check_command "sudo git clone pico-sdk"
-cd /opt/pico/pico-sdk || exit
-git config --global --add safe.directory /opt/pico/pico-sdk
-git submodule update --init
-check_command "git submodule update --init"
-
-echo "Adding the SDK and toolchain to PATH..." >&3
-echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
-echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
-echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
-source ~/.bashrc
-check_command "Updating PATH in .bashrc"
 
 echo "Installing additional development tools..." >&3
-sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y
-check_command "sudo apt-get install development tools"
+sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y $APT_OPTIONS
+check_command "sudo apt-get install development tools $APT_OPTIONS"
 
-echo "Installing Node.js..." >&3
-curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
-sudo apt-get install -y nodejs
-check_command "sudo apt-get install nodejs"
+if node --version &> /dev/null && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "Node.js is already installed. Skipping installation." >&3
+else
+    echo "Installing Node.js..." >&3
+    curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
+    sudo apt-get install -y nodejs $APT_OPTIONS
+    check_command "sudo apt-get install nodejs $APT_OPTIONS"
+fi
 
-echo "Setting up Visual Studio Code..." >&3
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
-rm -f packages.microsoft.gpg
-sudo apt update
-sudo apt install code -y
-check_command "sudo apt install code"
+
+if which code > /dev/null && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "Visual Studio Code is already installed. Skipping installation." >&3
+else
+    echo "Installing or reinstalling Visual Studio Code..." >&3
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+    echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+    rm -f packages.microsoft.gpg
+    sudo apt update
+    sudo apt install code -y $APT_OPTIONS
+    check_command "sudo apt install code $APT_OPTIONS"
+fi
 
 echo "Installing extensions for Visual Studio Code..." >&3
-for ext in cschlosser.doxdocgen gruntfuggly.todo-tree jebbs.plantuml jeff-hykin.better-cpp-syntax marus25.cortex-debug matepek.vscode-catch2-test-adapter mcu-debug.debug-tracker-vscode mcu-debug.memory-view mcu-debug.peripheral-viewer mcu-debug.rtos-views ms-vscode.cmake-tools ms-vscode.cpptools ms-vscode.cpptools-extension-pack ms-vscode.cpptools-themes ms-vscode.makefile-tools ms-vscode.test-adapter-converter ms-vscode.vscode-serial-monitor sonarsource.sonarlint-vscode twxs.cmake; do
-    code --install-extension $ext || { echo "Failed to install extension $ext - check $LOG_FILE for details."; exit 1; }
+
+# Define the list of VS Code extensions to install
+EXTENSIONS=(
+  cschlosser.doxdocgen
+  gruntfuggly.todo-tree
+  jebbs.plantuml
+  jeff-hykin.better-cpp-syntax
+  marus25.cortex-debug
+  matepek.vscode-catch2-test-adapter
+  mcu-debug.debug-tracker-vscode
+  mcu-debug.memory-view
+  mcu-debug.peripheral-viewer
+  mcu-debug.rtos-views
+  ms-vscode.cmake-tools
+  ms-vscode.cpptools
+  ms-vscode.cpptools-extension-pack
+  ms-vscode.cpptools-themes
+  ms-vscode.makefile-tools
+  ms-vscode.test-adapter-converter
+  ms-vscode.vscode-serial-monitor
+  sonarsource.sonarlint-vscode
+  twxs.cmake
+)
+
+# Loop through each extension and attempt to install it
+for ext in "${EXTENSIONS[@]}"; do
+    if [ "$FORCE_REINSTALL" -eq 1 ]; then
+        # For force reinstall, attempt to uninstall then install the extension
+        if code --uninstall-extension $ext &>/dev/null; then
+            echo "Uninstalled $ext for reinstallation." >&3
+        fi
+        # No need to check failure for uninstall as it may not be installed
+    fi
+
+    # Attempt to install the extension
+    if ! code --install-extension $ext &>>$LOG_FILE; then
+        echo "Failed to install extension $ext - check $LOG_FILE for details." >&3
+        # Continue with the next extension instead of exiting
+    else
+        echo "Successfully installed $ext." >&3
+    fi
 done
+
+echo '{
+  "cortex-debug.openocdPath": "${env:PICO_SDK_PATH}/../openocd/src/openocd",
+  "cmake.configureOnOpen": true,
+  "window.zoomLevel": 1,
+  "cpputestTestAdapter.logpanel": true,
+  "cpputestTestAdapter.testExecutable": "${workspaceFolder}/test/",
+  "cpputestTestAdapter.testExecutablePath": "${workspaceFolder}/test",
+  "explorer.confirmDragAndDrop": false,
+  "sonarlint.rules": {
+      "cpp:S5820": {
+          "level": "off"
+      }
+  },
+  "git.openRepositoryInParentFolders": "never",
+  "C_Cpp.default.compilerPath": "",
+  "cmake.options.statusBarVisibility": "visible",
+  "cmake.showOptionsMovedNotification": false,
+  "git.autofetch": true
+}' > ~/.config/Code/User/settings.json
 
 echo "Toolchain installed successfully." >&3
 
