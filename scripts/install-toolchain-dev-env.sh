@@ -13,7 +13,21 @@ trap cleanup SIGINT SIGTSTP
 LOG_FILE="setup-errors.log"
 # Clear the log file at the start of the script
 echo "" > $LOG_FILE
-exec 3>&1          # Preserve stdout in file descriptor 3
+
+# Function to disable output
+suppress_output() {
+    exec 3>&1  # Preserve current stdout in file descriptor 3
+    exec 4>&2  # Preserve current stderr in file descriptor 4
+    exec 1>/dev/null  # Redirect stdout to /dev/null
+    exec 2>>LOG_FILE  # Redirect stderr to log file
+}
+
+# Function to enable output
+enable_output() {
+    exec 1>&3  # Restore stdout from file descriptor 3
+    exec 2>&4  # Restore stderr from file descriptor 4
+}
+
 VERBOSE=0          # Control verbosity
 FORCE_REINSTALL=0  # Control forced reinstallation
 
@@ -49,8 +63,6 @@ while getopts ":vf" opt; do
 done
 shift $((OPTIND -1))
 
-exec 2>>$LOG_FILE  # Redirect stderr to log file
-
 if [ "$VERBOSE" -eq 0 ]; then
   exec 1>/dev/null  # Suppress stdout if not in verbose mode
 fi
@@ -75,7 +87,7 @@ check_submodule_initialized() {
     local submodule_path="$1"
     git submodule status "$submodule_path" | grep -q '^ ' && return 0 || return 1
 }
-
+suppress_output 
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
 
@@ -242,7 +254,7 @@ echo '{
 check_command "VS Code settings configuration"
 
 echo "Toolchain and environment setup completed successfully." >&3
-
+enable_output
 read -p "Do you wish to proceed with Git SSH key setup? (yes/no): " proceed_git_setup >&3
 
 if [[ "$proceed_git_setup" == "yes" ]]; then
@@ -250,6 +262,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     echo "Starting Git SSH key setup..." >&3
 
     # Prompt for Git username and email
+    enable_output
     read -p "Enter your Git username: " git_username >&3
     read -p "Enter your Git email: " git_email >&3
 
@@ -321,6 +334,8 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     read -p "Enter the full path where you want to clone 'sonic-firmware': " clone_path >&3
     mkdir -p "$clone_path" && cd "$clone_path"
     check_command "mkdir and cd into $clone_path"
+
+    suppress_output 
     
     # Clone the repository
     echo "Cloning 'sonic-firmware' into $clone_path..." >&3
