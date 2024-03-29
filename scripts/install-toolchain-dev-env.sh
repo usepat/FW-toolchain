@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # Setup script to configure development environment
+# Function to handle cleanup before exiting on Ctrl+C or Ctrl+Z
+cleanup() {
+    echo "Cleaning up before exit..."
+    exit 1
+}
+
+# Trap Ctrl+C and Ctrl+Z and call the cleanup function
+trap cleanup SIGINT SIGTSTP
 
 LOG_FILE="setup-errors.log"
 # Clear the log file at the start of the script
@@ -225,15 +233,15 @@ check_command "VS Code settings configuration"
 
 echo "Toolchain and environment setup completed successfully." >&3
 
-read -p "Do you wish to proceed with Git SSH key setup? (yes/no): " proceed_git_setup
+read -p "Do you wish to proceed with Git SSH key setup? (yes/no): " proceed_git_setup >&3
 
 if [[ "$proceed_git_setup" == "yes" ]]; then
     # Git SSH key setup begins
     echo "Starting Git SSH key setup..." >&3
 
     # Prompt for Git username and email
-    read -p "Enter your Git username: " git_username
-    read -p "Enter your Git email: " git_email
+    read -p "Enter your Git username: " git_username >&3
+    read -p "Enter your Git email: " git_email >&3
 
     # Configure Git with the provided username and email
     git config --global user.name "$git_username"
@@ -243,9 +251,9 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     # Generate an SSH key for the provided email, with passphrase prompt
     echo -e "\nYou can set an optional passphrase for your SSH key for added security..." >&3
     while true; do
-        read -s -p "Enter passphrase (or leave empty for no passphrase): " passphrase
+        read -s -p "Enter passphrase (or leave empty for no passphrase): " passphrase >&3
         echo >&3
-        read -s -p "Repeat passphrase: " passphrase_repeat
+        read -s -p "Repeat passphrase: " passphrase_repeat >&3
         echo >&3
 
         if [[ "$passphrase" == "$passphrase_repeat" ]]; then
@@ -255,9 +263,9 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
         fi
     done
     
-    read -p "Do you want to specify a custom name for the SSH key? (yes/no): " custom_key_name_decision
+    read -p "Do you want to specify a custom name for the SSH key? (yes/no): " custom_key_name_decision >&3
     if [[ "$custom_key_name_decision" == "yes" ]]; then
-        read -p "Enter the custom name for your SSH key (e.g., github_ed25519): " ssh_key_name
+        read -p "Enter the custom name for your SSH key (e.g., github_ed25519): " ssh_key_name >&3
         ssh_key_path="$HOME/.ssh/${ssh_key_name}"
     else
         ssh_key_name="id_ed25519"
@@ -276,7 +284,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
 
     echo -e "\nVisit https://github.com/settings/keys to add your SSH key." >&3
     while true; do
-        read -p "Type 'done' once you have added your SSH key to GitHub: " user_input
+        read -p "Type 'done' once you have added your SSH key to GitHub: " user_input >&3
         if [[ "$user_input" == "done" ]]; then
             break
         else
