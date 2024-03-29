@@ -23,7 +23,7 @@ while getopts ":vf" opt; do
       VERBOSE=1
       ;;
     f )
-      FORCE_REINSTALL=1,
+      FORCE_REINSTALL=1
       APT_OPTIONS="--reinstall"  # Set to reinstall packages with apt-get
       ;;
     \? )
@@ -70,10 +70,8 @@ if [ -d "$ARM_TOOLCHAIN_PATH/bin" ] && [ "$FORCE_REINSTALL" -eq 0 ]; then
 else
     echo "Downloading and installing ARM toolchain 13.2.1 ..." >&3
     wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-    sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
-    sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-    check_command "ARM toolchain 13.2.1 installation"
-    
+    check_command "wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+  
     echo "Extracting ARM GNU toolchain..." >&3
     sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
     check_command "sudo tar -xf /opt/arm-gnu-toolchain"
@@ -84,7 +82,6 @@ else
     
     echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
     echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
-    source ~/.bashrc
     check_command "Updating PATH in .bashrc"
 fi
 
@@ -105,7 +102,6 @@ else
   check_command "git submodule update --init"
   echo "Adding the SDK and toolchain to PATH..." >&3
   echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
-  source ~/.bashrc
   check_command "Updating PATH in .bashrc"
 fi
 
