@@ -5,17 +5,25 @@
 # Initialize a variable to control verbosity
 VERBOSE=0
 
+# Function to display usage and exit
+usage() {
+  echo "Usage: $0 [-v]" >&2
+  echo "  -v  Enable verbose mode" >&2
+  exit 1
+}
+
 # Check for the -v argument to enable verbose output
 while getopts ":v" opt; do
   case ${opt} in
     v )
       VERBOSE=1
       ;;
-    \? )
-      echo "Usage: cmd [-v]" >&2
+    * )
+      usage
       ;;
   esac
 done
+shift $((OPTIND -1))
 
 # Log file for storing error messages
 LOG_FILE="setup-errors.log"
@@ -38,6 +46,16 @@ check_command() {
         exit 1
     fi
 }
+
+# Function to control output based on the VERBOSE option
+log() {
+  if [ "$VERBOSE" -eq 1 ]; then
+    echo "$@" >&3  # Only output to terminal if verbose mode is enabled
+  fi
+}
+
+# Begin script execution
+log "Verbose mode enabled."
 
 echo "Starting system update..." >&3
 sudo apt-get update
