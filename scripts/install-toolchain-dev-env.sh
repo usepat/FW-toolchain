@@ -4,21 +4,25 @@
 
 # Initialize a variable to control verbosity
 VERBOSE=0
-
+APT_OPTIONS=""     # Initialize as empty
 # Function to display usage and exit
 usage() {
-  echo "Usage: $0 [-v]" >&2
+  echo "Usage: $0 [-v] [-f]" >&2
   echo "  -v  Enable verbose mode" >&2
+  echo "  -f  Force reinstall all apt-get packages" >&2
   exit 1
 }
 
-# Check for the -v argument to enable verbose output
-while getopts ":v" opt; do
+# Parse options
+while getopts ":vf" opt; do
   case ${opt} in
     v )
       VERBOSE=1
       ;;
-    * )
+    f )
+      APT_OPTIONS="--reinstall"  # Set to reinstall packages with apt-get
+      ;;
+    \? )
       usage
       ;;
   esac
@@ -62,8 +66,8 @@ sudo apt-get update
 check_command "sudo apt-get update"
 
 echo "Installing ARM toolchain 10.3.1 ..." >&3
-sudo apt-get install gcc-arm-none-eabi -y
-check_command "sudo apt-get install gcc-arm-none-eabi"
+sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
+check_command "sudo apt-get install gcc-arm-none-eabi $APT_OPTIONS"
 
 echo "Downloading ARM GNU toolchain 13.2.1 ..." >&3
 sudo wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
