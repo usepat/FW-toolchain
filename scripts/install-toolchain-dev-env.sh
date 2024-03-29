@@ -233,7 +233,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     read -p "Do you want to specify a custom name for the SSH key? (yes/no): " custom_key_name_decision
     if [[ "$custom_key_name_decision" == "yes" ]]; then
         read -p "Enter the custom name for your SSH key (e.g., github_ed25519): " ssh_key_name
-        ssh_key_path="~/.ssh/${ssh_key_name}"
+        ssh_key_path="$HOME/.ssh/${ssh_key_name}"
     else
         ssh_key_name="id_ed25519"
         ssh_key_path="$HOME/.ssh/id_ed25519"
