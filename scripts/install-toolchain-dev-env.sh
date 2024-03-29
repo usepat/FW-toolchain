@@ -117,9 +117,9 @@ else
     sudo rm "$TOOLCHAIN_TAR"
     check_command "ARM toolchain 13.2.1 cleanup"
 
-    # Add PICO_TOOLCHAIN_PATH to ~/.bashrc
-    echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
-    echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
+    # Add PICO_TOOLCHAIN_PATH to ~/.bashrc if it's not already added
+    grep -qxF 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' ~/.bashrc || echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
+    grep -qxF 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' ~/.bashrc || echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
     check_command "PICO toolchain PATH update"
 fi
 
@@ -134,15 +134,25 @@ if [ -d "$PICO_SDK_PATH" ] && check_submodule_initialized "$PICO_SDK_PATH/lib/ti
 else
     echo "Installing the Pico SDK..." >&3
     sudo mkdir -p /opt/pico
-    sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
-    check_command "Pico SDK clone"
+    if [ ! -d "$PICO_SDK_PATH/.git" ]; then
+        sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
+        check_command "Pico SDK clone"
+    else
+        echo "Pico SDK repository already exists. Pulling latest changes..." >&3
+        cd "$PICO_SDK_PATH" || exit
+        sudo git pull origin master
+        check_command "Pico SDK pull"
+    fi
 
     cd "$PICO_SDK_PATH" || exit
     git config --global --add safe.directory "$PICO_SDK_PATH"
-    git submodule update --init
-    check_command "Pico SDK submodules initialization"
-    # Add PICO_SDK_PATH to ~/.bashrc
-    echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
+    if [ ! -f "$PICO_SDK_PATH/lib/tinyusb/README.md" ]; then
+        git submodule update --init
+        check_command "Pico SDK submodules initialization"
+    fi
+
+    # Add PICO_SDK_PATH to ~/.bashrc if it's not already added
+    grep -qxF 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' ~/.bashrc || echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
     check_command "PICO_SDK_PATH update"
 fi
 
