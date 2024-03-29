@@ -116,7 +116,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
         ssh_key_path="~/.ssh/${ssh_key_name}"
     else
         ssh_key_name="id_ed25519"
-        ssh_key_path="~/.ssh/id_ed25519"
+        ssh_key_path="$HOME/.ssh/id_ed25519"
     fi
     
     ssh-keygen -t ed25519 -C "$git_email" -f "$ssh_key_path" -N "$passphrase"
