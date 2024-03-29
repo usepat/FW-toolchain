@@ -109,15 +109,24 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
             echo "Passphrases do not match. Please try again."
         fi
     done
-
-    ssh-keygen -t ed25519 -C "$git_email" -f ~/.ssh/id_ed25519 -N "$passphrase"
+    
+    read -p "Do you want to specify a custom name for the SSH key? (yes/no): " custom_key_name_decision
+    if [[ "$custom_key_name_decision" == "yes" ]]; then
+        read -p "Enter the custom name for your SSH key (e.g., github_ed25519): " ssh_key_name
+        ssh_key_path="~/.ssh/${ssh_key_name}"
+    else
+        ssh_key_name="id_ed25519"
+        ssh_key_path="~/.ssh/id_ed25519"
+    fi
+    
+    ssh-keygen -t ed25519 -C "$git_email" -f "$ssh_key_path" -N "$passphrase"
     check_command "ssh-keygen"
 
     eval "$(ssh-agent -s)"
-    ssh-add ~/.ssh/id_ed25519
+    ssh-add "$ssh_key_path"
     check_command "ssh-add"
 
-    xclip -selection clipboard < ~/.ssh/id_ed25519.pub
+    xclip -selection clipboard < "${ssh_key_path}.pub"
     echo "SSH public key copied to clipboard. Please add it to your GitHub account."
 
     echo -e "\nVisit https://github.com/settings/keys to add your SSH key."
