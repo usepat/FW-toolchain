@@ -87,7 +87,7 @@ check_submodule_initialized() {
     git submodule status "$submodule_path" | grep -q '^ ' && return 0 || return 1
 }
 suppress_output 
-ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi"
+ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
 
 # Begin script execution
@@ -100,15 +100,6 @@ check_command "System update"
 echo "Checking for ARM toolchain 10.3.1 ..." >&3
 sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
 check_command "ARM toolchain 10.3.1 installation"
-
-echo "Debug: Checking if ARM toolchain exists at $ARM_TOOLCHAIN_PATH/bin/arm-none-eabi-gcc" >&3
-if [ -x "$ARM_TOOLCHAIN_PATH/bin/arm-none-eabi-gcc" ]; then
-    echo "Debug: The ARM toolchain executable exists and is executable." >&3
-else
-    echo "Debug: The ARM toolchain executable does not exist or is not executable." >&3
-fi
-
-echo "Debug: FORCE_REINSTALL flag is set to $FORCE_REINSTALL" >&3
 
 # Check if ARM toolchain is already installed
 echo "Checking for ARM toolchain 13.2.1 ..." >&3
