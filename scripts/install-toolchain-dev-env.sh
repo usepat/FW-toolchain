@@ -118,7 +118,7 @@ else
     check_command "ARM toolchain 13.2.1 cleanup"
 
     # Add PICO_TOOLCHAIN_PATH to ~/.bashrc if it's not already added
-    grep -qxF 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' ~/.bashrc || echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
+    grep -qxF "export PICO_TOOLCHAIN_PATH="$ARM_TOOLCHAIN_PATH"/bin" ~/.bashrc || echo "export PICO_TOOLCHAIN_PATH="$ARM_TOOLCHAIN_PATH"/bin" >> ~/.bashrc
     grep -qxF 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' ~/.bashrc || echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
     check_command "PICO toolchain PATH update"
 fi
@@ -147,12 +147,12 @@ else
     cd "$PICO_SDK_PATH" || exit
     git config --global --add safe.directory "$PICO_SDK_PATH"
     if [ ! -f "$PICO_SDK_PATH/lib/tinyusb/README.md" ]; then
-        git submodule update --init
+        sudo git submodule update --init
         check_command "Pico SDK submodules initialization"
     fi
 
     # Add PICO_SDK_PATH to ~/.bashrc if it's not already added
-    grep -qxF 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' ~/.bashrc || echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
+    grep -qxF "export PICO_SDK_PATH="$PICO_SDK_PATH"" ~/.bashrc || echo "export PICO_SDK_PATH="$PICO_SDK_PATH"" >> ~/.bashrc
     check_command "PICO_SDK_PATH update"
 fi
 
