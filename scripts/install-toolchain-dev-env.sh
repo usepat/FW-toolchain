@@ -14,21 +14,31 @@ LOG_FILE="setup-errors.log"
 # Clear the log file at the start of the script
 echo "" > "$LOG_FILE"
 
-# Function to disable output
-suppress_output() {
-    exec 3>&1  # Preserve current stdout in file descriptor 3
-    exec 4>&2  # Preserve current stderr in file descriptor 4
-    exec 2>>"$LOG_FILE"  # Redirect stderr to log file
-}
+exec 3>&1  # Preserve original stdout for always-visible messages
+exec 4>&2  # Preserve original stderr for logging errors
 
-# Function to enable output
-enable_output() {
-    exec 1>&3  # Restore stdout from file descriptor 3
-    exec 2>&4  # Restore stderr from file descriptor 4
-}
+# Redirect all errors to log file
+exec 2>>"$LOG_FILE"
+
 
 VERBOSE=0          # Control verbosity
 FORCE_REINSTALL=0  # Control forced reinstallation
+
+suppress_output() {
+    if [ "$VERBOSE" -eq 0 ]; then
+        exec 1>/dev/null  # Suppress stdout
+    fi
+}
+
+# Function to enable output for read commands or important messages
+enable_output() {
+    exec 1>&3  # Restore stdout for visibility
+}
+
+# Always-visible logging function
+log() {
+    echo "$@" >&3  # Use preserved stdout for logs
+}
 
 # Function to display usage and exit
 usage() {
@@ -51,20 +61,18 @@ while getopts ":vf" opt; do
       APT_OPTIONS="--reinstall"  # Set to reinstall packages with apt-get
       ;;
     h )  # Handle help option
+      enable_output
       usage
       exit 0
       ;;
     \? )
+        enable_output
       usage
       exit 1
       ;;
   esac
 done
 shift $((OPTIND -1))
-
-if [ "$VERBOSE" -eq 0 ]; then
-  exec 1>/dev/null  # Suppress stdout if not in verbose mode
-fi
 
 # Function to check command execution
 check_command() {
@@ -74,19 +82,15 @@ check_command() {
     fi
 }
 
-# Function to control output based on the VERBOSE option
-log() {
-  if [ "$VERBOSE" -eq 1 ]; then
-    echo "$@" >&3  # Only output to terminal if verbose mode is enabled
-  fi
-}
 
 # Define a function to check if a submodule is initialized
 check_submodule_initialized() {
     local submodule_path="$1"
     git submodule status "$submodule_path" | grep -q '^ ' && return 0 || return 1
 }
+
 suppress_output 
+
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
 
