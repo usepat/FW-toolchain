@@ -145,5 +145,39 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
 else
     echo "Skipping Git SSH key setup." >&3
 fi
+echo "Setup git successfully." >&3
 
+read -p "Do you wish to clone the 'sonic-firmware' repository? (yes/no): " clone_repo_decision >&3
+
+if [[ "$clone_repo_decision" == "yes" ]]; then
+    # Ask for the directory to clone into
+    read -p "Enter the full path where you want to clone 'sonic-firmware': " clone_path >&3
+    mkdir -p "$clone_path" && cd "$clone_path"
+    check_command "mkdir and cd into $clone_path"
+    
+    # Clone the repository
+    echo "Cloning 'sonic-firmware' into $clone_path..." >&3
+    git clone git@github.com:usepat/sonic-firmware.git
+    check_command "git clone sonic-firmware"
+
+    # Change directory into the cloned repository
+    cd sonic-firmware
+    check_command "cd sonic-firmware"
+
+    # Checkout the development branch and update submodules
+    echo "Checking out the 'development' branch..." >&3
+    git checkout development
+    check_command "git checkout development"
+
+    echo "Updating submodules..." >&3
+    git pull
+    check_command "git pull"
+
+    git submodule update --init --recursive --remote
+    check_command "git submodule update"
+    
+    echo "Repository 'sonic-firmware' is ready for use." >&3
+else
+    echo "Skipping repository cloning." >&3
+fi
 echo "Setup completed successfully." >&3
