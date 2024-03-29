@@ -10,7 +10,7 @@ cleanup() {
 # Trap Ctrl+C and Ctrl+Z and call the cleanup function
 trap cleanup SIGINT SIGTSTP
 
-LOG_FILE="setup-errors.log"
+LOG_FILE="setup-errors.log" 
 # Clear the log file at the start of the script
 echo "" > $LOG_FILE
 
