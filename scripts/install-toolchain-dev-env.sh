@@ -62,6 +62,12 @@ log() {
   fi
 }
 
+# Define a function to check if a submodule is initialized
+check_submodule_initialized() {
+    local submodule_path="$1"
+    git submodule status "$submodule_path" | grep -q '^ ' && return 0 || return 1
+}
+
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
 
@@ -72,12 +78,15 @@ echo "Starting system update..." >&3
 sudo apt-get update
 check_command "System update"
 
-echo "Checking for ARM toolchain..." >&3
+echo "Checking for ARM toolchain 10.3.1 ..." >&3
 sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
-check_command "ARM toolchain installation"
+check_command "ARM toolchain 10.3.1 installation"
 
-# Download and install ARM toolchain if not already installed or if FORCE_REINSTALL is enabled
-if [ ! -d "$ARM_TOOLCHAIN_PATH/bin" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
+# Check if ARM toolchain is already installed
+echo "Checking for ARM toolchain 13.2.1 ..." >&3
+if [ -d "$ARM_TOOLCHAIN_PATH/bin" ] && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "ARM toolchain 13.2.1 is already installed. Skipping download and extraction." >&3
+else
     TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
     TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
     
@@ -87,18 +96,18 @@ if [ ! -d "$ARM_TOOLCHAIN_PATH/bin" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
 
     # Check if the toolchain directory already exists and clean it up if FORCE_REINSTALL is set
     if [ -d "$ARM_TOOLCHAIN_PATH" ] && [ "$FORCE_REINSTALL" -eq 1 ]; then
-        echo "Removing existing ARM toolchain directory..." >&3
+        echo "Removing existing ARM toolchain 13.2.1 directory..." >&3
         sudo rm -rf "$ARM_TOOLCHAIN_PATH"
-        check_command "Existing ARM toolchain directory removal"
+        check_command "Existing ARM toolchain 13.2.1 directory removal"
     fi
   
-    echo "Extracting ARM GNU toolchain..." >&3
+    echo "Extracting ARM GNU toolchain 13.2.1 ..." >&3
     sudo tar -xf "$TOOLCHAIN_TAR" -C /opt
-    check_command "ARM toolchain extraction"
+    check_command "ARM toolchain extraction 13.2.1"
     
-    echo "Cleaning up ARM GNU toolchain tarball..." >&3
+    echo "Cleaning up ARM GNU toolchain 13.2.1 tarball..." >&3
     sudo rm "$TOOLCHAIN_TAR"
-    check_command "ARM toolchain cleanup"
+    check_command "ARM toolchain 13.2.1 cleanup"
 
     # Add PICO_TOOLCHAIN_PATH to ~/.bashrc
     echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
@@ -110,9 +119,11 @@ fi
 sudo apt-get install git -y $APT_OPTIONS
 check_command "Git installation"
 
-# Pico SDK Installation
+# Check if Pico SDK is already installed
 echo "Checking for Pico SDK..." >&3
-if [ ! -d "$PICO_SDK_PATH" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
+if [ -d "$PICO_SDK_PATH" ] && check_submodule_initialized "$PICO_SDK_PATH/lib/tinyusb" && [ "$FORCE_REINSTALL" -eq 0 ]; then
+    echo "Pico SDK and required submodules are already installed and initialized. Skipping installation." >&3
+else
     echo "Installing the Pico SDK..." >&3
     sudo mkdir -p /opt/pico
     sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
