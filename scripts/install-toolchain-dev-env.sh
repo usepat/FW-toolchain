@@ -61,11 +61,11 @@ echo "Starting system update..." >&3
 sudo apt-get update
 check_command "sudo apt-get update"
 
-echo "Installing ARM toolchain..." >&3
+echo "Installing ARM toolchain 10.3.1 ..." >&3
 sudo apt-get install gcc-arm-none-eabi -y
 check_command "sudo apt-get install gcc-arm-none-eabi"
 
-echo "Downloading ARM GNU toolchain..." >&3
+echo "Downloading ARM GNU toolchain 13.2.1 ..." >&3
 sudo wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 check_command "sudo wget -P /opt ARM GNU toolchain"
 
@@ -78,7 +78,7 @@ sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 check_command "sudo rm /opt/arm-gnu-toolchain tarball"
 
 echo "Installing the Pico SDK..." >&3
-sudo apt-get install git
+sudo apt-get install git -y
 sudo mkdir -p /opt/pico
 sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master /opt/pico/pico-sdk
 check_command "sudo git clone pico-sdk"
