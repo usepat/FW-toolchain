@@ -264,7 +264,14 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     echo "SSH public key copied to clipboard. Please add it to your GitHub account." >&3
 
     echo -e "\nVisit https://github.com/settings/keys to add your SSH key." >&3
-    read -p "Press enter once you have added your SSH key to GitHub."
+    while true; do
+        read -p "Type 'done' once you have added your SSH key to GitHub: " user_input
+        if [[ "$user_input" == "done" ]]; then
+            break
+        else
+            echo "Please type 'done' after you have added your SSH key to GitHub." >&3
+        fi
+    done
 
     ssh_out=$(ssh -T git@github.com 2>&1)
     if [[ $ssh_out == *"successfully authenticated"* ]]; then
