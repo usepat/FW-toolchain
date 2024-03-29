@@ -3,7 +3,6 @@
 # Setup script to configure development environment
 
 LOG_FILE="setup-errors.log"
-exec 2>>$LOG_FILE  # Redirect stderr to log file
 exec 3>&1          # Preserve stdout in file descriptor 3
 VERBOSE=0          # Control verbosity
 FORCE_REINSTALL=0  # Control forced reinstallation
@@ -32,6 +31,8 @@ while getopts ":vf" opt; do
   esac
 done
 shift $((OPTIND -1))
+
+exec 2>>$LOG_FILE  # Redirect stderr to log file
 
 if [ "$VERBOSE" -eq 0 ]; then
   exec 1>/dev/null  # Suppress stdout if not in verbose mode
