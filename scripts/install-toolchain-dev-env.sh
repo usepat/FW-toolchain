@@ -9,9 +9,11 @@ FORCE_REINSTALL=0  # Control forced reinstallation
 
 # Function to display usage and exit
 usage() {
-  echo "Usage: $0 [-v] [-f]" >&2
+  echo "Usage: $0 [options]" >&2
+  echo "Options:" >&2
   echo "  -v  Enable verbose mode" >&2
   echo "  -f  Force reinstall all apt-get packages" >&2
+  echo "  -h  Display this help message and exit" >&2
   exit 1
 }
 
@@ -25,8 +27,13 @@ while getopts ":vf" opt; do
       FORCE_REINSTALL=1
       APT_OPTIONS="--reinstall"  # Set to reinstall packages with apt-get
       ;;
+    h )  # Handle help option
+      usage
+      exit 0
+      ;;
     \? )
       usage
+      exit 1
       ;;
   esac
 done
