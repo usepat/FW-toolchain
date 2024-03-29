@@ -40,7 +40,7 @@ fi
 # Function to check command execution
 check_command() {
     if [ $? -ne 0 ]; then
-        echo "Setup failed at command: $1 - check $LOG_FILE for details." >&3
+        echo "Setup failed during: $1 - check $LOG_FILE for details." >&3
         exit 1
     fi
 }
@@ -51,76 +51,78 @@ log() {
     echo "$@" >&3  # Only output to terminal if verbose mode is enabled
   fi
 }
+
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
+
 # Begin script execution
 log "Verbose mode enabled."
 
 echo "Starting system update..." >&3
 sudo apt-get update
-check_command "sudo apt-get update"
+check_command "System update"
 
-echo "Installing ARM toolchain 10.3.1 ..." >&3
+echo "Checking for ARM toolchain..." >&3
 sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
-check_command "sudo apt-get install gcc-arm-none-eabi $APT_OPTIONS"
+check_command "ARM toolchain installation"
 
-# Check if ARM toolchain already exists or force reinstall is enabled
-if [ -d "$ARM_TOOLCHAIN_PATH/bin" ] && [ "$FORCE_REINSTALL" -eq 0 ]; then
-    echo "ARM toolchain already installed. Skipping installation." >&3
-else
-    echo "Downloading and installing ARM toolchain 13.2.1 ..." >&3
+# Download and install ARM toolchain if not already installed or if FORCE_REINSTALL is enabled
+if [ ! -d "$ARM_TOOLCHAIN_PATH/bin" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
+    echo "Downloading ARM toolchain 13.2.1..." >&3
     wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-    check_command "wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+    check_command "ARM toolchain download"
   
     echo "Extracting ARM GNU toolchain..." >&3
     sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
-    check_command "sudo tar -xf /opt/arm-gnu-toolchain"
+    check_command "ARM toolchain extraction"
     
     echo "Cleaning up ARM GNU toolchain tarball..." >&3
     sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-    check_command "sudo rm /opt/arm-gnu-toolchain tarball"
-    
+    check_command "ARM toolchain cleanup"
+
+    # Add PICO_TOOLCHAIN_PATH to ~/.bashrc
     echo 'export PICO_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
     echo 'export PATH="$PATH:$PICO_TOOLCHAIN_PATH"' >> ~/.bashrc
-    check_command "Updating PATH in .bashrc"
+    check_command "PICO toolchain PATH update"
 fi
 
+# Installation of Git
 sudo apt-get install git -y $APT_OPTIONS
-check_command "Installing git $APT_OPTIONS"
-if [ -d "$PICO_SDK_PATH" ] && [ -d "$PICO_SDK_PATH/lib/tinyusb" ] && git -C "$PICO_SDK_PATH" submodule status | grep -q 'tinyusb' && [ "$FORCE_REINSTALL" -eq 0 ]; then
-    echo "Pico SDK and required submodules already installed. Skipping installation." >&3
-else
-  echo "Installing the Pico SDK..." >&3
-  if [ ! -d "$PICO_SDK_PATH" ]; then
-      sudo mkdir -p /opt/pico
-      sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
-      check_command "sudo git clone pico-sdk"
-  fi
-  cd /opt/pico/pico-sdk || exit
-  git config --global --add safe.directory /opt/pico/pico-sdk
-  git submodule update --init
-  check_command "git submodule update --init"
-  echo "Adding the SDK and toolchain to PATH..." >&3
-  echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
-  check_command "Updating PATH in .bashrc"
+check_command "Git installation"
+
+# Pico SDK Installation
+echo "Checking for Pico SDK..." >&3
+if [ ! -d "$PICO_SDK_PATH" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
+    echo "Installing the Pico SDK..." >&3
+    sudo mkdir -p /opt/pico
+    sudo git clone https://github.com/raspberrypi/pico-sdk.git --branch master "$PICO_SDK_PATH"
+    check_command "Pico SDK clone"
+
+    cd "$PICO_SDK_PATH" || exit
+    git config --global --add safe.directory "$PICO_SDK_PATH"
+    git submodule update --init
+    check_command "Pico SDK submodules initialization"
+    # Add PICO_SDK_PATH to ~/.bashrc
+    echo 'export PICO_SDK_PATH="/opt/pico/pico-sdk"' >> ~/.bashrc
+    check_command "PICO_SDK_PATH update"
 fi
 
-
-
+# Additional development tools installation
 echo "Installing additional development tools..." >&3
 sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y $APT_OPTIONS
-check_command "sudo apt-get install development tools $APT_OPTIONS"
+check_command "Development tools installation"
 
+# Node.js installation or check
 if node --version &> /dev/null && [ "$FORCE_REINSTALL" -eq 0 ]; then
     echo "Node.js is already installed. Skipping installation." >&3
 else
     echo "Installing Node.js..." >&3
     curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
     sudo apt-get install -y nodejs $APT_OPTIONS
-    check_command "sudo apt-get install nodejs $APT_OPTIONS"
+    check_command "Node.js installation"
 fi
 
-
+# Visual Studio Code installation or check
 if which code > /dev/null && [ "$FORCE_REINSTALL" -eq 0 ]; then
     echo "Visual Studio Code is already installed. Skipping installation." >&3
 else
@@ -131,12 +133,11 @@ else
     rm -f packages.microsoft.gpg
     sudo apt update
     sudo apt install code -y $APT_OPTIONS
-    check_command "sudo apt install code $APT_OPTIONS"
+    check_command "Visual Studio Code installation"
 fi
 
+# Installation of VS Code extensions
 echo "Installing extensions for Visual Studio Code..." >&3
-
-# Define the list of VS Code extensions to install
 EXTENSIONS=(
   cschlosser.doxdocgen
   gruntfuggly.todo-tree
@@ -158,26 +159,18 @@ EXTENSIONS=(
   sonarsource.sonarlint-vscode
   twxs.cmake
 )
-
-# Loop through each extension and attempt to install it
 for ext in "${EXTENSIONS[@]}"; do
     if [ "$FORCE_REINSTALL" -eq 1 ]; then
-        # For force reinstall, attempt to uninstall then install the extension
-        if code --uninstall-extension $ext &>/dev/null; then
-            echo "Uninstalled $ext for reinstallation." >&3
-        fi
-        # No need to check failure for uninstall as it may not be installed
+        code --uninstall-extension $ext &>/dev/null
     fi
-
-    # Attempt to install the extension
-    if ! code --install-extension $ext &>>$LOG_FILE; then
+    code --install-extension $ext &>>$LOG_FILE || {
         echo "Failed to install extension $ext - check $LOG_FILE for details." >&3
-        # Continue with the next extension instead of exiting
-    else
-        echo "Successfully installed $ext." >&3
-    fi
+    }
 done
+echo "VS Code extensions installed." >&3
 
+# Configure VS Code settings
+echo 'Configuring Visual Studio Code settings...' >&3
 echo '{
   "cortex-debug.openocdPath": "${env:PICO_SDK_PATH}/../openocd/src/openocd",
   "cmake.configureOnOpen": true,
@@ -197,8 +190,9 @@ echo '{
   "cmake.showOptionsMovedNotification": false,
   "git.autofetch": true
 }' > ~/.config/Code/User/settings.json
+check_command "VS Code settings configuration"
 
-echo "Toolchain installed successfully." >&3
+echo "Toolchain and environment setup completed successfully." >&3
 
 read -p "Do you wish to proceed with Git SSH key setup? (yes/no): " proceed_git_setup
 
