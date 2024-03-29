@@ -3,6 +3,8 @@
 # Setup script to configure development environment
 
 LOG_FILE="setup-errors.log"
+# Clear the log file at the start of the script
+echo "" > $LOG_FILE
 exec 3>&1          # Preserve stdout in file descriptor 3
 VERBOSE=0          # Control verbosity
 FORCE_REINSTALL=0  # Control forced reinstallation
