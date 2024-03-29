@@ -25,14 +25,19 @@ VERBOSE=0          # Control verbosity
 FORCE_REINSTALL=0  # Control forced reinstallation
 
 suppress_output() {
+    # Suppress stdout if VERBOSE is not set to 1
     if [ "$VERBOSE" -eq 0 ]; then
-        exec 1>/dev/null  # Suppress stdout
+        exec 1>/dev/null
     fi
+    # Continue redirecting stderr to the log file
+    exec 2>>"$LOG_FILE"
 }
 
 # Function to enable output for read commands or important messages
 enable_output() {
-    exec 1>&3  # Restore stdout for visibility
+    # Restore stdout and stderr to their original destinations
+    exec 1>&3
+    exec 2>&4
 }
 
 # Always-visible logging function
@@ -79,15 +84,6 @@ check_command() {
     if [ $? -ne 0 ]; then
         echo "Setup failed during: $1 - check $LOG_FILE for details." >&3
         exit 1
-    fi
-}
-
-# Function to handle commands based on verbose setting
-run_cmd() {
-    if [ "$VERBOSE" -eq 1 ]; then
-        "$@"  # Execute command as is if verbose
-    else
-        "$@" >/dev/null 2>&1  # Suppress both stdout and stderr if not verbose
     fi
 }
 
