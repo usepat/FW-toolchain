@@ -104,7 +104,7 @@ check_command "ARM toolchain 10.3.1 installation"
 
 # Check if ARM toolchain is already installed
 echo "Checking for ARM toolchain 13.2.1 ..." >&3
-if [ -d "$ARM_TOOLCHAIN_PATH/bin" ] && [ "$FORCE_REINSTALL" -eq 0 ]; then
+if [ -x "$ARM_TOOLCHAIN_PATH/bin/arm-none-eabi-gcc" ]  && [ "$FORCE_REINSTALL" -eq 0 ]; then
     echo "ARM toolchain 13.2.1 is already installed. Skipping download and extraction." >&3
 else
     TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
