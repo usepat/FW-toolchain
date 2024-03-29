@@ -76,16 +76,26 @@ check_command "ARM toolchain installation"
 
 # Download and install ARM toolchain if not already installed or if FORCE_REINSTALL is enabled
 if [ ! -d "$ARM_TOOLCHAIN_PATH/bin" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
+    TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+    TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+    
     echo "Downloading ARM toolchain 13.2.1..." >&3
-    sudo wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    sudo wget -O "$TOOLCHAIN_TAR" "$TOOLCHAIN_URL"
     check_command "ARM toolchain download"
+
+    # Check if the toolchain directory already exists and clean it up if FORCE_REINSTALL is set
+    if [ -d "$ARM_TOOLCHAIN_PATH" ] && [ "$FORCE_REINSTALL" -eq 1 ]; then
+        echo "Removing existing ARM toolchain directory..." >&3
+        sudo rm -rf "$ARM_TOOLCHAIN_PATH"
+        check_command "Existing ARM toolchain directory removal"
+    fi
   
     echo "Extracting ARM GNU toolchain..." >&3
-    sudo tar -xf /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
+    sudo tar -xf "$TOOLCHAIN_TAR" -C /opt
     check_command "ARM toolchain extraction"
     
     echo "Cleaning up ARM GNU toolchain tarball..." >&3
-    sudo rm /opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    sudo rm "$TOOLCHAIN_TAR"
     check_command "ARM toolchain cleanup"
 
     # Add PICO_TOOLCHAIN_PATH to ~/.bashrc
