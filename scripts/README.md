@@ -3,5 +3,5 @@
 If git is already setup, then download the file install-toolchain-dev-env.sh
 
 ```bash
-wget "https://github.com/usepat/toolchain/blob/main/scripts" -O install-toolchain-dev-env.sh
+wget "https://raw.githubusercontent.com/usepat/toolchain/main/scripts/install-toolchain-dev-env.sh"
 ```
