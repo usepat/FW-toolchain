@@ -12,13 +12,13 @@ trap cleanup SIGINT SIGTSTP
 
 LOG_FILE="setup-errors.log" 
 # Clear the log file at the start of the script
-echo "" > $LOG_FILE
+echo "" > "$LOG_FILE"
 
 # Function to disable output
 suppress_output() {
     exec 3>&1  # Preserve current stdout in file descriptor 3
     exec 4>&2  # Preserve current stderr in file descriptor 4
-    exec 2>>LOG_FILE  # Redirect stderr to log file
+    exec 2>>"$LOG_FILE"  # Redirect stderr to log file
 }
 
 # Function to enable output
@@ -223,7 +223,7 @@ for ext in "${EXTENSIONS[@]}"; do
     if [ "$FORCE_REINSTALL" -eq 1 ]; then
         code --uninstall-extension $ext &>/dev/null
     fi
-    code --install-extension $ext &>>$LOG_FILE || {
+    sudo code --install-extension $ext &>>"$LOG_FILE" || {
         echo "Failed to install extension $ext - check $LOG_FILE for details." >&3
     }
 done
