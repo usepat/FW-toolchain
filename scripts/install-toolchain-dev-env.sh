@@ -318,4 +318,4 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
 else
     echo "Skipping repository cloning." >&3
 fi
-echo "Setup completed successfully." >&3
+echo "Setup completed successfully. Run 'source ~/.bashrc' to apply the changes, or restart your machine." >&3
