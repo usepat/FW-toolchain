@@ -77,7 +77,7 @@ check_command "ARM toolchain installation"
 # Download and install ARM toolchain if not already installed or if FORCE_REINSTALL is enabled
 if [ ! -d "$ARM_TOOLCHAIN_PATH/bin" ] || [ "$FORCE_REINSTALL" -eq 1 ]; then
     echo "Downloading ARM toolchain 13.2.1..." >&3
-    wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+    sudo wget -P /opt https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
     check_command "ARM toolchain download"
   
     echo "Extracting ARM GNU toolchain..." >&3
