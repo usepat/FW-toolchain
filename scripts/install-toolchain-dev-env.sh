@@ -128,6 +128,7 @@ ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
 TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
 TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+PLANTUML_URL="http://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar"
 
 # Begin script execution
 echo "Verbose mode enabled."
@@ -213,6 +214,17 @@ cd "$original_dir"
 log "Installing additional development tools..." 
 sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y $APT_OPTIONS
 check_command "Development tools installation"
+
+# PlantUML installation or check
+if [[ -f "/opt/plantuml/plantuml.jar" && -f "/usr/bin/plantuml" ]]; then
+  log 'PlantUML already installed.'
+  else
+  log 'Installing PlantUML ...'
+  sudo mkdir -p /opt/plantuml
+  sudo curl -o /opt/plantuml/plantuml.jar -L "${PLANTUML_URL}"
+  sudo sh -c 'printf "#!/bin/sh\nexec java -Djava.awt.headless=true -jar /opt/plantuml/plantuml.jar \"\$@\"" > /usr/bin/plantuml'
+  sudo chmod +x /usr/bin/plantuml
+fi
 
 # Node.js installation or check
 if node --version &> /dev/null && [ "$FORCE_REINSTALL" -eq 0 ]; then
