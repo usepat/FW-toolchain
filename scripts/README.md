@@ -1,5 +1,8 @@
 # Run the install-toolchain-dev-env
 
+adsd
+
+
 Download the script and run it without sudo<br>
 Use option -v to get verbose output, use option -f to force reinstall<br>
 If the scripts fails, the output will be written into setup-error.log
