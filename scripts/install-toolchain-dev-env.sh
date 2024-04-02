@@ -89,14 +89,45 @@ check_command() {
 
 # Define a function to check if a submodule is initialized
 check_submodule_initialized() {
-    local submodule_path="$1"
-    git submodule status "$submodule_path" | grep -q '^ ' && return 0 || return 1
+    local top_repo="$1"
+    local original_dir=$(pwd)
+    if ! cd "$top_repo" 2>/dev/null; then
+        log "Failed to navigate to top-level repository at $top_repo."  >> "$LOG_FILE"
+        return 0
+    fi
+    # Execute git submodule status and capture the output
+    local submodule_status=$(git submodule status 2>&1)
+    local status=$?
+    # Return to the original directory
+    cd "$original_dir"
+    # Check for failure in executing git submodule status
+    if [ $status -ne 0 ]; then
+        log "Failed to execute git submodule status."  >> "$LOG_FILE"
+        return 0
+    fi
+
+    # Check if there are no submodules in the repository
+    if [ -z "$submodule_status" ]; then
+        echo "No submodules in the repository." >> "$LOG_FILE"
+        return 1
+    fi
+
+    # Check for uninitialized submodules
+    if echo "$submodule_status" | grep -q "^-"; then
+        echo "Submodules not initialized."
+        return 0
+    else
+        echo "All submodules are initialized."
+        return 1
+    fi
 }
 
 suppress_output 
 
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
+TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
 
 # Begin script execution
 log "Verbose mode enabled."
@@ -114,9 +145,6 @@ log "Checking for ARM toolchain 13.2.1 ..."
 if [ -x "$ARM_TOOLCHAIN_PATH/bin/arm-none-eabi-gcc" ]  && [ "$FORCE_REINSTALL" -eq 0 ]; then
     log "ARM toolchain 13.2.1 is already installed. Skipping download and extraction." 
 else
-    TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
-    TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
-    
     log "Downloading ARM toolchain 13.2.1..." 
     sudo wget -O "$TOOLCHAIN_TAR" "$TOOLCHAIN_URL"
     check_command "ARM toolchain download"
@@ -148,7 +176,7 @@ check_command "Git installation"
 
 # Check if Pico SDK is already installed
 log "Checking for Pico SDK..." 
-if [ -d "$PICO_SDK_PATH" ] && check_submodule_initialized "$PICO_SDK_PATH/lib/tinyusb" && [ "$FORCE_REINSTALL" -eq 0 ]; then
+if [ -d "$PICO_SDK_PATH" ] && check_submodule_initialized "$PICO_SDK_PATH" && [ "$FORCE_REINSTALL" -eq 0 ]; then
     log "Pico SDK and required submodules are already installed and initialized. Skipping installation." 
 else
     log "Installing the Pico SDK..." 
@@ -165,10 +193,16 @@ else
 
     cd "$PICO_SDK_PATH" || exit
     git config --global --add safe.directory "$PICO_SDK_PATH"
-    if [ ! -f "$PICO_SDK_PATH/lib/tinyusb/README.md" ]; then
+
+    log "Checking submodules of Pico SDK..."
+    if [! check_submodule_initialized "$PICO_SDK_PATH"]; then
+        log "Init submodules..."
         sudo git submodule update --init
         check_command "Pico SDK submodules initialization"
+    else
+        log "Submodules already initialized."
     fi
+    
 
     # Add PICO_SDK_PATH to ~/.bashrc if it's not already added
     grep -qxF "export PICO_SDK_PATH="$PICO_SDK_PATH"" ~/.bashrc || echo "export PICO_SDK_PATH="$PICO_SDK_PATH"" >> ~/.bashrc
@@ -232,6 +266,9 @@ for ext in "${EXTENSIONS[@]}"; do
         code --uninstall-extension $ext &>/dev/null
     fi
     code --install-extension $ext
+    if [ $? -ne 0 ]; then
+        log "Failed to install extension $ext - check $LOG_FILE for details."
+    fi
 done
 log "VS Code extensions installed." 
 
