@@ -1,6 +1,7 @@
 # Run the install-toolchain-dev-env
 
-adsd
+This script will install all tools needed for building the sonic-firmware repo for both pico and linux build options. It will also install vscode and several usefull extensions as well as importing settings for vscode.
+Furthermore it helps with setting up SSH keys for GitHub and cloning the sonic-firmware repo.<br>
 
 
 Download the script and run it without sudo<br>
