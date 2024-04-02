@@ -190,13 +190,13 @@ else
         sudo git pull origin master
         check_command "Pico SDK pull"
     fi
-
-    cd "$PICO_SDK_PATH" || exit
+    
     git config --global --add safe.directory "$PICO_SDK_PATH"
 
     log "Checking submodules of Pico SDK..."
     if  ! check_submodule_initialized "$PICO_SDK_PATH" || [ "$FORCE_REINSTALL" -eq 1 ]; then
         log "Init submodules..."
+        cd "$PICO_SDK_PATH" || exit
         sudo git submodule update --init
         check_command "Pico SDK submodules initialization"
     else
