@@ -195,7 +195,7 @@ else
     git config --global --add safe.directory "$PICO_SDK_PATH"
 
     log "Checking submodules of Pico SDK..."
-    if [check_submodule_initialized "$PICO_SDK_PATH"]; then
+    if [check_submodule_initialized "$PICO_SDK_PATH"] && [ "$FORCE_REINSTALL" -eq 0 ]; then
         log "Init submodules..."
         sudo git submodule update --init
         check_command "Pico SDK submodules initialization"
