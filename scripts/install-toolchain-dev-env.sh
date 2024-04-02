@@ -215,6 +215,10 @@ log "Installing additional development tools..."
 sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip default-jre minicom -y $APT_OPTIONS
 check_command "Development tools installation"
 
+MINICOM_CMD="export MINICOM=' -D /dev/ttyACM0 -b 115200'"
+grep -qxF "$MINICOM_CMD" ~/.bashrc || echo "$MINICOM_CMD" >> ~/.bashrc
+check_command "Set MINICOM settings"
+
 # PlantUML installation or check
 if [[ -f "/opt/plantuml/plantuml.jar" && -f "/usr/bin/plantuml" ]] && [ "$FORCE_REINSTALL" -eq 0 ]; then
   log 'PlantUML already installed.'
@@ -415,4 +419,4 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
 else
     log "Skipping repository cloning." 
 fi
-log "Setup completed successfully. Run 'source ~/.bashrc' to apply the changes, or restart your machine." 
+log "Setup completed successfully. Run 'su - $USER' to apply the changes, or restart your machine." 
