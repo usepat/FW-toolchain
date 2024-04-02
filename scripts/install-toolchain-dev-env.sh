@@ -93,7 +93,7 @@ check_submodule_initialized() {
     local top_repo="$1"
     if ! cd "$top_repo" 2>/dev/null; then
         log "Failed to navigate to top-level repository at $top_repo."  >> "$LOG_FILE"
-        return 0
+        return 1
     fi
     # Execute git submodule status and capture the output
     local submodule_status=$(git submodule status 2>&1)
@@ -103,22 +103,22 @@ check_submodule_initialized() {
     # Check for failure in executing git submodule status
     if [ $status -ne 0 ]; then
         log "Failed to execute git submodule status."  >> "$LOG_FILE"
-        return 0
+        return 1
     fi
 
     # Check if there are no submodules in the repository
     if [ -z "$submodule_status" ]; then
         echo "No submodules in the repository." >> "$LOG_FILE"
-        return 1
+        return 0
     fi
 
     # Check for uninitialized submodules
     if echo "$submodule_status" | grep -q "^-"; then
         echo "Submodules not initialized."
-        return 0
+        return 1
     else
         echo "All submodules are initialized."
-        return 1
+        return 0
     fi
 }
 
@@ -130,7 +130,7 @@ TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/b
 TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
 
 # Begin script execution
-log "Verbose mode enabled."
+echo "Verbose mode enabled."
 
 log "Starting system update..."
 sudo apt-get update
