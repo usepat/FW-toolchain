@@ -216,7 +216,7 @@ sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y $APT_OPTION
 check_command "Development tools installation"
 
 # PlantUML installation or check
-if [[ -f "/opt/plantuml/plantuml.jar" && -f "/usr/bin/plantuml" ]]; then
+if [[ -f "/opt/plantuml/plantuml.jar" && -f "/usr/bin/plantuml" ]] && [ "$FORCE_REINSTALL" -eq 0 ]; then
   log 'PlantUML already installed.'
   else
   log 'Installing PlantUML ...'
