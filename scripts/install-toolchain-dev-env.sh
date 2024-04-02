@@ -225,15 +225,13 @@ EXTENSIONS=(
   ms-vscode.test-adapter-converter
   ms-vscode.vscode-serial-monitor
   sonarsource.sonarlint-vscode
-  twxs.cmake
+  twxs.cmak
 )
 for ext in "${EXTENSIONS[@]}"; do
     if [ "$FORCE_REINSTALL" -eq 1 ]; then
         code --uninstall-extension $ext &>/dev/null
     fi
-    sudo code --install-extension $ext &>>"$LOG_FILE" || {
-        log "Failed to install extension $ext - check $LOG_FILE for details." 
-    }
+    code --install-extension $ext
 done
 log "VS Code extensions installed." 
 
