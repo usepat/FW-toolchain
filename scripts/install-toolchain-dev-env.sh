@@ -2,6 +2,7 @@
 
 # Setup script to configure development environment
 # Function to handle cleanup before exiting on Ctrl+C or Ctrl+Z
+original_dir=$(pwd)
 cleanup() {
     echo "Cleaning up before exit..."
     exit 1
@@ -90,7 +91,6 @@ check_command() {
 # Define a function to check if a submodule is initialized
 check_submodule_initialized() {
     local top_repo="$1"
-    local original_dir=$(pwd)
     if ! cd "$top_repo" 2>/dev/null; then
         log "Failed to navigate to top-level repository at $top_repo."  >> "$LOG_FILE"
         return 0
@@ -208,7 +208,7 @@ else
     grep -qxF "export PICO_SDK_PATH="$PICO_SDK_PATH"" ~/.bashrc || echo "export PICO_SDK_PATH="$PICO_SDK_PATH"" >> ~/.bashrc
     check_command "PICO_SDK_PATH update"
 fi
-
+cd "$original_dir"
 # Additional development tools installation
 log "Installing additional development tools..." 
 sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip -y $APT_OPTIONS
@@ -259,7 +259,7 @@ EXTENSIONS=(
   ms-vscode.test-adapter-converter
   ms-vscode.vscode-serial-monitor
   sonarsource.sonarlint-vscode
-  twxs.cmak
+  twxs.cmake
 )
 for ext in "${EXTENSIONS[@]}"; do
     if [ "$FORCE_REINSTALL" -eq 1 ]; then
@@ -372,7 +372,7 @@ read -p "Do you wish to clone the 'sonic-firmware' repository? (yes/no): " clone
 
 if [[ "$clone_repo_decision" == "yes" ]]; then
     # Ask for the directory to clone into
-    read -p "Enter the full path where you want to clone 'sonic-firmware': " clone_path 
+    read -p "Enter the full path where you want to clone 'sonic-firmware' or relative path starting with ./: " clone_path 
     mkdir -p "$clone_path" && cd "$clone_path"
     check_command "mkdir and cd into $clone_path"
 
