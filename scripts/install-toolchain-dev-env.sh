@@ -379,7 +379,7 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     suppress_output 
     
     # Clone the repository
-    log "Cloning 'sonic-firmware' into $clone_path..." 
+    log "Cloning 'sonic-firmware' into $clone_path ..." 
     git clone git@github.com:usepat/sonic-firmware.git
     check_command "git clone sonic-firmware"
 
