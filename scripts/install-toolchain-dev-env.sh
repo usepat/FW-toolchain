@@ -424,6 +424,20 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
 
     git submodule update --init --recursive --remote
     check_command "git submodule update"
+
+    log "Building the project..."
+    mkdir -p build && cd build
+    check_command "mkdir and cd into build directory"
+    cmake .. -DTOOLCHAIN=pico
+    check_command "CMake configuration"
+    cmake --build .
+    check_command "CMake build"
+
+    if [ -n "$WSL_DISTRO_NAME" ]; then
+        wsl_build_path="\\\\wsl$\\Ubuntu\\home\\$USER\\$(realpath --relative-to=$HOME $clone_path)/sonic-firmware/build"
+        cmd.exe /c "mklink /D %USERPROFILE%\\Desktop\\sonic-firmware-build \"$wsl_build_path\""
+        check_command "Create symlink on Desktop
+    fi
     
     log "Repository 'sonic-firmware' is ready for use." 
 else
