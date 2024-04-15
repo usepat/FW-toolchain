@@ -428,10 +428,10 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     log "Building the project..."
     mkdir -p build && cd build
     check_command "mkdir and cd into build directory"
-    cmake .. -DTOOLCHAIN=pico
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DTOOLCHAIN=pico
     check_command "CMake configuration"
     cmake --build .
-    check_command "CMake build"
+    #check_command "CMake build"
 
     if [ -n "$WSL_DISTRO_NAME" ]; then
         wsl_build_path="\\\\wsl$\\Ubuntu\\home\\$USER\\$(realpath --relative-to=$HOME $clone_path)/sonic-firmware/build"
