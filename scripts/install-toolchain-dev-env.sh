@@ -431,7 +431,12 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTOOLCHAIN=pico
     check_command "CMake configuration"
     cmake --build .
-    #check_command "CMake build"
+    build_result=$?  # Capture the exit status of the build command
+    if [ $build_result -ne 0 ]; then
+        log "Build failed, see $LOG_FILE for details. Continuing with remaining setup steps..."
+    else
+        log "Build succeeded."
+    fi
 
     if [ -n "$WSL_DISTRO_NAME" ]; then
         wsl_build_path="\\\\wsl$\\Ubuntu\\home\\$USER\\$(realpath --relative-to=$HOME $clone_path)/sonic-firmware/build"
