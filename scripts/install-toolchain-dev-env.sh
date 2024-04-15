@@ -364,8 +364,12 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     eval "$(ssh-agent -s)"
     ssh-add "$ssh_key_path"
     check_command "ssh-add"
-
-    xclip -selection clipboard < "${ssh_key_path}.pub"
+    if [ -n "$WSL_DISTRO_NAME" ]; then
+        cat "${ssh_key_path}.pub" | clip.exe
+    else
+        xclip -selection clipboard < "${ssh_key_path}.pub"
+    fi
+    
     log "SSH public key copied to clipboard. Please add it to your GitHub account." 
 
     log -e "\nVisit https://github.com/settings/keys to add your SSH key." 
@@ -425,4 +429,4 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
 else
     log "Skipping repository cloning." 
 fi
-log "Setup completed successfully. Run 'su - $USER' to apply the changes, or restart your machine." 
+log "Setup completed successfully. Run 'su - $USER' to apply the changes, or restart your machine. On WSL you have to restart command line" 
