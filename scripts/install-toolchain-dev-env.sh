@@ -428,7 +428,7 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     log "Building the project..."
     mkdir -p build/pico && cd build/pico
     check_command "mkdir and cd into build directory"
-    cmake .. -DCMAKE_BUILD_TYPE=Debug -DTOOLCHAIN=pico
+    cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DTOOLCHAIN=pico
     check_command "CMake configuration"
     cmake --build .
     build_result=$?  # Capture the exit status of the build command
