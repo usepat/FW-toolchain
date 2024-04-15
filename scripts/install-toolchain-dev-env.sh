@@ -212,7 +212,7 @@ fi
 cd "$original_dir"
 # Additional development tools installation
 log "Installing additional development tools..." 
-sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip default-jre minicom -y $APT_OPTIONS
+sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip default-jre minicom build-essential -y $APT_OPTIONS
 check_command "Development tools installation"
 
 MINICOM_CMD="export MINICOM=' -D /dev/ttyACM0 -b 115200'"
