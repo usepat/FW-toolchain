@@ -288,6 +288,12 @@ for ext in "${EXTENSIONS[@]}"; do
 done
 log "VS Code extensions installed." 
 
+if [ -n "$WSL_DISTRO_NAME" ]; then
+    APPDATA_PATH=$(cmd.exe /c "echo %APPDATA%" | tr -d '\r' | grep "^C:\\\\")
+    VSCODE_SETTINGS_PATH="$APPDATA_PATH\\Code\\User\\settings.json"
+else
+    VSCODE_SETTINGS_PATH=~/.config/Code/User/settings.json
+fi
 # Configure VS Code settings
 log 'Configuring Visual Studio Code settings...' 
 echo '{
@@ -308,7 +314,7 @@ echo '{
   "cmake.options.statusBarVisibility": "visible",
   "cmake.showOptionsMovedNotification": false,
   "git.autofetch": true
-}' > ~/.config/Code/User/settings.json
+}' > "$VSCODE_SETTINGS_PATH"
 check_command "VS Code settings configuration"
 
 log "Toolchain and environment setup completed successfully." 
