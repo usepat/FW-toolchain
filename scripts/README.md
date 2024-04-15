@@ -16,3 +16,13 @@ After the scripts has run succesfully, execute:
 ```bash
 source ~/.bashrc
 ```
+or
+```bash
+su - $USER
+```
+If you ran the script in a WSL in windows. Restart the terminal and then run:
+```bash
+code
+```
+And then click on the blue button in the buttom left corner and choose "Connect to WSL using Distro" and select Ubuntu.
+Now open the sonic-firmware folder and you are done.
