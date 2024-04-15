@@ -426,7 +426,7 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     check_command "git submodule update"
 
     log "Building the project..."
-    mkdir -p build && cd build
+    mkdir -p build/pico && cd build/pico
     check_command "mkdir and cd into build directory"
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTOOLCHAIN=pico
     check_command "CMake configuration"
@@ -436,14 +436,7 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
         log "Build failed, see $LOG_FILE for details. Continuing with remaining setup steps..."
     else
         log "Build succeeded."
-    fi
-
-    if [ -n "$WSL_DISTRO_NAME" ]; then
-        wsl_build_path="\\\\wsl$\\Ubuntu\\home\\$USER\\$(realpath --relative-to=$HOME $clone_path)/sonic-firmware/build"
-        sudo cmd.exe /c "mklink /D %USERPROFILE%\\Desktop\\sonic-firmware-build \"$wsl_build_path\""
-        check_command "Create symlink on Desktop"
-    fi
-    
+    fi  
     log "Repository 'sonic-firmware' is ready for use." 
 else
     log "Skipping repository cloning." 
