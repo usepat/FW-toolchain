@@ -124,9 +124,13 @@ check_submodule_initialized() {
 
 suppress_output 
 
-ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
+ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi"
+
+CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v4.0.1/cmake-4.0.1.tar.gz"
+CMAKE_TAR_NAME="cmake-4.0.1.tar.gz"
+CMAKE_PATH="cmake-4.0.1"
 PICO_SDK_PATH="/opt/pico/pico-sdk"
-TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
+TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz"
 TOOLCHAIN_TAR="/opt/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz"
 PLANTUML_URL="http://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar"
 
@@ -140,6 +144,26 @@ check_command "System update"
 log "Checking for ARM toolchain 10.3.1 ..." 
 sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
 check_command "ARM toolchain 10.3.1 installation"
+
+
+log "Installing CMake 4.0.1..."
+REQUIRED_VERSION="4.0.1"
+INSTALLED_VERSION="$(cmake --version | head -n1 | awk '{print $3}')"
+
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ] && [ "$REQUIRED_VERSION" != "$INSTALLED_VERSION" ]; then
+    echo "Newer version already installed."
+else
+    sudo wget "$CMAKE_URL"
+    sudo tar -xzf "$CMAKE_TAR_NAME"
+    sudo rm -r "$CMAKE_TAR_NAME"
+    cd ./"$CMAKE_PATH"
+    sudo ./bootstrap
+    sudo make
+    sudo make install
+    cd ..
+    sudo rm -r ./"$CMAKE_PATH"
+    check_command "CMake installed: "
+fi
 
 # Check if ARM toolchain is already installed
 log "Checking for ARM toolchain 13.2.1 ..." 
@@ -212,7 +236,7 @@ fi
 cd "$original_dir"
 # Additional development tools installation
 log "Installing additional development tools..." 
-sudo apt-get install doxygen graphviz mscgen dia curl cmake xclip default-jre minicom build-essential -y $APT_OPTIONS
+sudo apt-get install doxygen graphviz mscgen dia curl xclip default-jre minicom build-essential -y $APT_OPTIONS
 check_command "Development tools installation"
 
 MINICOM_CMD="export MINICOM=' -D /dev/ttyACM0 -b 115200'"
