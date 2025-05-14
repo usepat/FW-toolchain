@@ -142,7 +142,7 @@ sudo apt-get update
 check_command "System update"
 
 log "Checking for ARM toolchain 10.3.1 ..." 
-sudo apt-get install gcc-arm-none-eabi -y $APT_OPTIONS
+sudo apt-get install gcc-arm-none-eabi libssl-dev pkg-config -y $APT_OPTIONS
 check_command "ARM toolchain 10.3.1 installation"
 
 
