@@ -165,6 +165,10 @@ else
     check_command "CMake installed: "
 fi
 
+log "Installing Qt5"
+sudo apt install -y qtcreator qtbase5-dev qt5-qmake -y $APT_OPTIONS
+check_command "Qt5 download"
+
 # Check if ARM toolchain is already installed
 log "Checking for ARM toolchain 13.2.1 ..." 
 if [ -x "$ARM_TOOLCHAIN_PATH/bin/arm-none-eabi-gcc" ]  && [ "$FORCE_REINSTALL" -eq 0 ]; then
