@@ -217,6 +217,7 @@ else
         log "Pico SDK repository already exists. Pulling latest changes..." 
         cd "$PICO_SDK_PATH" || exit
         sudo git pull origin master
+        sudo git checkout 6a7db34ff63345a7badec79ebea3aaef1712f374
         check_command "Pico SDK pull"
     fi
     
