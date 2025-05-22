@@ -286,25 +286,25 @@ fi
 # Installation of VS Code extensions
 log "Installing extensions for Visual Studio Code..." 
 EXTENSIONS=(
-  cschlosser.doxdocgen
-  gruntfuggly.todo-tree
-  jebbs.plantuml
-  jeff-hykin.better-cpp-syntax
-  marus25.cortex-debug
-  matepek.vscode-catch2-test-adapter
-  mcu-debug.debug-tracker-vscode
-  mcu-debug.memory-view
-  mcu-debug.peripheral-viewer
-  mcu-debug.rtos-views
-  ms-vscode.cmake-tools
-  ms-vscode.cpptools
-  ms-vscode.cpptools-extension-pack
-  ms-vscode.cpptools-themes
-  ms-vscode.makefile-tools
-  ms-vscode.test-adapter-converter
-  ms-vscode.vscode-serial-monitor
-  sonarsource.sonarlint-vscode
-  twxs.cmake
+    chouzz.vscode-innosetup
+    github.vscode-github-actions
+    github.vscode-pull-request-github
+    mhutchie.git-graph
+    ms-vscode.vscode-serial-monitor
+    ms-python.black-formatter
+    ms-python.debugpy
+    ms-python.python
+    ms-python.vscode-pylance
+    charliermarsh.ruff
+    SonarSource.sonarlint-vscode
+    bierner.markdown-preview-github-styles
+    jebbs.plantuml
+    myml.vscode-markdown-plantuml-preview
+    yzhang.markdown-all-in-one
+    tamasfe.even-better-toml
+    streetsidesoftware.code-spell-checker
+    streetsidesoftware.code-spell-checker-british-english
+    d-biehl.robotcode
 )
 for ext in "${EXTENSIONS[@]}"; do
     if [ "$FORCE_REINSTALL" -eq 1 ]; then
