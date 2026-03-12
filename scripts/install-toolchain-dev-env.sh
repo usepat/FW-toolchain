@@ -122,6 +122,38 @@ check_submodule_initialized() {
     fi
 }
 
+setup_gh_auth() {
+    log "Checking GitHub CLI authentication..."
+
+    if ! command -v gh >/dev/null 2>&1; then
+        log "GitHub CLI not found. Installing gh..."
+        sudo apt-get install -y gh $APT_OPTIONS
+        check_command "GitHub CLI installation"
+    fi
+
+    if gh auth status >/dev/null 2>&1; then
+        log "gh is already authenticated."
+        gh auth setup-git >/dev/null 2>&1 || true
+        return 0
+    fi
+
+    if [ -n "${GITHUB_TOKEN:-}" ]; then
+        log "Authenticating gh using GITHUB_TOKEN..."
+        printf '%s\n' "$GITHUB_TOKEN" | gh auth login --hostname github.com --with-token
+        check_command "gh auth login --with-token"
+    else
+        # Interactive fallback
+        enable_output
+        log "Launching interactive gh auth login..."
+        gh auth login --hostname github.com --git-protocol ssh --web
+        check_command "gh auth login"
+        suppress_output
+    fi
+
+    gh auth setup-git >/dev/null 2>&1 || true
+    log "gh authentication configured."
+}
+
 suppress_output 
 
 ARM_TOOLCHAIN_PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi"
