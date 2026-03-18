@@ -467,13 +467,34 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     
     # Clone the repository
     log "Cloning 'sonic-firmware' into $clone_path ..." 
-    git clone git@github.com:usepat/sonic-firmware.git
-    check_command "git clone sonic-firmware"
+    git clone git@github.com:usepat/FW-sonic-firmware.git
+    check_command "git clone FW-sonic-firmware"
+    
+    git clone git@github.com:usepat/SW-soniccontrol.git
+    check_command "git clone SW-soniccontrol"
+    base_dir="$PWD"
+    grep -qxF "export SONICCONTROL_PATH="$base_dir/SW-soniccontrol"" ~/.bashrc || echo "export SONICCONTROL_PATH="$base_dir/SW-soniccontrol"" >> ~/.bashrc
+    check_command "SONICCONTROL_PATH update"
+    cd SW-soniccontrol
+    check_command "cd SW-soniccontrol"
+    
+    python -m venv .venv
+    check_command "Creating venv"
+    
+    ./.venv/bin/activate
+    check_command "Activating venv"
+    
+    pip install -e .
+    check_command "pip install -e ."
 
+    cd ..
+    check_command "cd .."
     # Change directory into the cloned repository
-    cd sonic-firmware
-    check_command "cd sonic-firmware"
-
+    grep -qxF "export FIRMWARE_BUILD_DIR_PATH="$base_dir/FW-sonic-firmware/build"" ~/.bashrc || echo "export FIRMWARE_BUILD_DIR_PATH="$base_dir//FW-sonic-firmware/build"" >> ~/.bashrc
+    check_command "FIRMWARE_BUILD_DIR_PATH update"
+    cd FW-sonic-firmware
+    check_command "cd FW-sonic-firmware"
+    
     # Checkout the development branch and update submodules
     log "Checking out the 'development' branch..." 
     git checkout development
