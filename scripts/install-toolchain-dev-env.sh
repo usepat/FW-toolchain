@@ -446,6 +446,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     ssh_out=$(ssh -T git@github.com 2>&1)
     if [[ $ssh_out == *"successfully authenticated"* ]]; then
         log "SSH connection to GitHub verified successfully!" 
+        setup_gh_auth
     else
         log "SSH connection to GitHub failed. Check $LOG_FILE for details." 
         log "Received response: $ssh_out" 
