@@ -182,7 +182,7 @@ log "Installing CMake 4.0.1..."
 REQUIRED_VERSION="4.0.1"
 INSTALLED_VERSION="$(cmake --version | head -n1 | awk '{print $3}')"
 
-if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ] && [ "$REQUIRED_VERSION" != "$INSTALLED_VERSION" ]; then
+if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$INSTALLED_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ]; then
     echo "Newer version already installed."
 else
     sudo wget "$CMAKE_URL"
@@ -447,6 +447,7 @@ if [[ "$proceed_git_setup" == "yes" ]]; then
     if [[ $ssh_out == *"successfully authenticated"* ]]; then
         log "SSH connection to GitHub verified successfully!" 
         setup_gh_auth
+        check_command "Setup gh auth"
     else
         log "SSH connection to GitHub failed. Check $LOG_FILE for details." 
         log "Received response: $ssh_out" 
@@ -479,10 +480,10 @@ if [[ "$clone_repo_decision" == "yes" ]]; then
     cd SW-soniccontrol
     check_command "cd SW-soniccontrol"
     
-    python -m venv .venv
+    python3 -m venv .venv
     check_command "Creating venv"
     
-    ./.venv/bin/activate
+    source .venv/bin/activate
     check_command "Activating venv"
     
     pip install -e .
